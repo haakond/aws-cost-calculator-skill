@@ -1,0 +1,14 @@
+{
+  "name": "aws-cost-calculator",
+  "displayName": "AWS Cost Calculator",
+  "version": "0.1.0",
+  "description": "Build a real, shareable AWS Pricing Calculator (calculator.aws) estimate for an AWS architecture, with a confirm-before-write plan table, assumptions tracking and documentation cross-checks.",
+  "author": {
+    "name": "Håkon Eriksen Drange",
+    "url": "https://github.com/haakond"
+  },
+  "homepage": "https://github.com/haakond/aws-cost-calculator-skill",
+  "repository": "https://github.com/haakond/aws-cost-calculator-skill",
+  "license": "MIT",
+  "keywords": ["aws", "pricing", "cost", "estimate", "calculator", "aws pricing calculator", "cost estimate"]
+}

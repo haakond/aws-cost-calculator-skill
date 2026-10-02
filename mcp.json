@@ -1,0 +1,14 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "aws-pricing-calculator-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "sample-aws-pricing-calculator-mcp@latest"]
+    },
+    "aws-knowledge-mcp-server": {
+      "type": "http",
+      "url": "https://knowledge-mcp.global.api.aws"
+    }
+  }
+}

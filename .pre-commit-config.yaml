@@ -1,0 +1,8 @@
+repos:
+  - repo: local
+    hooks:
+      - id: no-commit-trailers
+        name: no co-author or assistant-attribution trailers in commit message
+        entry: scripts/check-commit-msg-trailers.sh
+        language: script
+        stages: [commit-msg]
