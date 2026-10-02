@@ -153,66 +153,146 @@ The agent asks for any usage figures the material does not contain (request rate
 
 ## Quick start
 
-The skill depends on two MCP servers: [`aws-pricing-calculator-mcp-server`](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) (builds the estimate, required) and the [AWS Knowledge MCP server](https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server) (documentation fact check, strongly recommended). Neither needs AWS credentials. [Node.js](https://nodejs.org/en/download) is required for the calculator server. The Claude Code, Kiro and Cursor routes below install the skill and both servers together.
+**Prerequisite:** [Node.js](https://nodejs.org/en/download). Check with `node --version`. No AWS account or credentials are needed.
 
-After installing, ask the agent to "get started with the AWS cost calculator". A short onboarding skill, `aws-cost-calculator-getting-started`, checks that both servers are connected, explains the workflow and asks what to estimate.
+The setup has two parts, two MCP servers and the skills:
 
-### Claude Code
+| Component | Name in this repo | Role |
+|---|---|---|
+| [AWS Pricing Calculator MCP server](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) | `pricing-calculator` | Builds the estimate on `calculator.aws`. Required. |
+| [AWS Knowledge MCP server](https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server) | `aws-knowledge` | Checks the design against AWS documentation. Strongly recommended. |
+| Skills | `aws-cost-calculator`, `aws-cost-calculator-getting-started` | The estimating workflow, and a short onboarding guide |
 
-```text
-/plugin marketplace add haakond/aws-cost-calculator-skill
-/plugin install aws-cost-calculator@aws-cost-calculator
-```
+Choose one option:
 
-Or in one command (Claude Code 2.1.275 or later):
+- **Option A, plugin:** Claude Code, Kiro or Cursor. One install sets up both servers and both skills.
+- **Option B, manual:** any other agent, or if you prefer to set up each part yourself.
 
-```text
-/plugin install aws-cost-calculator --marketplace haakond/aws-cost-calculator-skill
-```
+Then [verify the setup](#verify-the-setup).
 
-Choose a scope when prompted, then run `/reload-plugins` if asked. The skill activates when a request is about an AWS cost estimate; it can also be run as `/aws-cost-calculator:aws-cost-calculator`. Verify with `claude plugin list`.
+### Option A: install as a plugin
 
-### Kiro
+#### Claude Code
 
-Install as a [Kiro Power](https://kiro.dev/docs/powers/): Powers panel → **Add Custom Power** → **Import power from GitHub** → `https://github.com/haakond/aws-cost-calculator-skill` → **Install**.
+1. Add the marketplace and install the plugin:
 
-For a local clone, choose **Import power from a folder** and select the clone's root directory (the one containing `plugin.json`).
-
-The Power activates when a request mentions one of the keywords in `plugin.json` (`aws`, `pricing`, `cost`, `estimate`, ...).
-
-Do not also copy the skill into `~/.kiro/skills/`; the skill would be registered twice.
-
-### Cursor
-
-Import the repository as a plugin: **Customize** → **Add Marketplace** → **Import from Repo** → `https://github.com/haakond/aws-cost-calculator-skill`. Cursor reads the root `plugin.json` ([Agent Plugins format](https://cursor.com/docs/plugins)), which brings in the skill and both MCP servers.
-
-If the import is unavailable in the installed Cursor version, install the pieces manually:
-
-1. MCP servers, one click each: [calculator server](https://cursor.com/en/install-mcp?name=pricing-calculator&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNhbXBsZS1hd3MtcHJpY2luZy1jYWxjdWxhdG9yLW1jcEBsYXRlc3QiXX0%3D) and [AWS Knowledge server](https://cursor.com/en/install-mcp?name=aws-knowledge&config=eyJ1cmwiOiJodHRwczovL2tub3dsZWRnZS1tY3AuZ2xvYmFsLmFwaS5hd3MifQ%3D%3D), or add the JSON from [`mcp.json`](mcp.json) to `~/.cursor/mcp.json`.
-2. Skills: copy both directories under `skills/` to `~/.cursor/skills/` (Cursor also reads `~/.claude/skills/` and `~/.agents/skills/`).
-
-### Other agents
-
-GitHub Copilot, Gemini CLI and any other client that supports Agent Skills and MCP can use the skill in two manual steps.
-
-1. Register both servers using the JSON in [`mcp.json`](mcp.json). In Claude Code without the plugin:
-
-   ```sh
-   claude mcp add pricing-calculator -- npx -y sample-aws-pricing-calculator-mcp@latest
-   claude mcp add --transport http aws-knowledge https://knowledge-mcp.global.api.aws
+   ```text
+   /plugin marketplace add haakond/aws-cost-calculator-skill
+   /plugin install aws-cost-calculator@aws-cost-calculator
    ```
 
-   For VS Code / GitHub Copilot use the "Install in VS Code" badge in the [calculator server README](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp), and note that VS Code uses a `servers` key instead of `mcpServers`.
+   On Claude Code 2.1.275 or later, one command does both: `/plugin install aws-cost-calculator --marketplace haakond/aws-cost-calculator-skill`.
+2. Choose a scope when prompted, then run `/reload-plugins` if asked.
+3. Run `claude plugin list` and check that `aws-cost-calculator` is enabled.
+4. Continue with [Verify the setup](#verify-the-setup).
 
-2. Copy both directories under `skills/` into the agent's skills directory (`aws-cost-calculator` is the one that builds estimates; the getting-started skill is optional):
+#### Kiro
 
-   | Agent | Personal | Project |
-   |---|---|---|
-   | GitHub Copilot | `~/.copilot/skills/` (also reads `~/.claude/skills/`, `~/.agents/skills/`) | `.github/skills/` (also reads `.claude/skills/`, `.agents/skills/`) |
-   | Gemini CLI | `~/.gemini/skills/` (or `~/.agents/skills/`) | `.gemini/skills/` (or `.agents/skills/`) |
-   | Claude Code (without the plugin) | `~/.claude/skills/` | `.claude/skills/` |
+1. Open the Powers panel and choose **Add Custom Power** → **Import power from GitHub**.
+2. Enter `https://github.com/haakond/aws-cost-calculator-skill` and choose **Install**. For a local clone, choose **Import power from a folder** and select the clone's root directory.
+3. In the MCP server list, check that `pricing-calculator` and `aws-knowledge` (prefixed with the Power name) show as **Connected**.
+4. Continue with [Verify the setup](#verify-the-setup).
 
-Restart the client afterwards: MCP servers and skills are not picked up by a running session. To verify, ask the agent to call `get_server_info` (calculator server) and to search the AWS documentation (Knowledge server).
+Do not also copy the skills into `~/.kiro/skills/`; they would be registered twice.
+
+#### Cursor
+
+1. Open **Customize** and choose **Add Marketplace** → **Import from Repo**.
+2. Enter `https://github.com/haakond/aws-cost-calculator-skill`. Cursor reads the root `plugin.json` ([Agent Plugins format](https://cursor.com/docs/plugins)) and installs both servers and both skills.
+3. Continue with [Verify the setup](#verify-the-setup).
+
+If the import is not available in your Cursor version, use Option B.
+
+### Option B: manual setup
+
+#### 1. Install the AWS Pricing Calculator MCP server
+
+| Agent | How |
+|---|---|
+| Claude Code | `claude mcp add pricing-calculator -- npx -y sample-aws-pricing-calculator-mcp@latest` |
+| Cursor | [One-click install](https://cursor.com/en/install-mcp?name=pricing-calculator&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNhbXBsZS1hd3MtcHJpY2luZy1jYWxjdWxhdG9yLW1jcEBsYXRlc3QiXX0%3D) |
+| VS Code / GitHub Copilot | "Install in VS Code" badge in the [server's README](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) |
+| Other agents | Add the JSON below to the agent's MCP configuration |
+
+```json
+{
+  "mcpServers": {
+    "pricing-calculator": {
+      "command": "npx",
+      "args": ["-y", "sample-aws-pricing-calculator-mcp@latest"]
+    }
+  }
+}
+```
+
+#### 2. Install the AWS Knowledge MCP server
+
+A remote server hosted by AWS. Nothing runs locally.
+
+| Agent | How |
+|---|---|
+| Claude Code | `claude mcp add --transport http aws-knowledge https://knowledge-mcp.global.api.aws` |
+| Cursor | [One-click install](https://cursor.com/en/install-mcp?name=aws-knowledge&config=eyJ1cmwiOiJodHRwczovL2tub3dsZWRnZS1tY3AuZ2xvYmFsLmFwaS5hd3MifQ%3D%3D) |
+| Other agents | Add a remote (HTTP) server with the URL `https://knowledge-mcp.global.api.aws` |
+
+VS Code uses a `servers` key instead of `mcpServers` in its MCP configuration.
+
+#### 3. Set up your coding agent
+
+Clone this repository and copy both directories under `skills/` into the agent's skills directory:
+
+```sh
+git clone https://github.com/haakond/aws-cost-calculator-skill
+cp -R aws-cost-calculator-skill/skills/* ~/.claude/skills/
+```
+
+Replace `~/.claude/skills/` with the directory for your agent:
+
+| Agent | Personal | Project |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Cursor | `~/.cursor/skills/` | `.cursor/skills/` |
+| GitHub Copilot | `~/.copilot/skills/` | `.github/skills/` |
+| Gemini CLI | `~/.gemini/skills/` | `.gemini/skills/` |
+| Cursor, GitHub Copilot, Gemini CLI (shared) | `~/.agents/skills/` | `.agents/skills/` |
+
+Restart the agent afterwards. MCP servers and skills are only picked up when a session starts.
+
+#### 4. Continue with [Verify the setup](#verify-the-setup)
+
+### Verify the setup
+
+1. **Check the servers.** Ask the agent:
+
+   ```text
+   Get started with the AWS cost calculator.
+   ```
+
+   Expected: the version of the `pricing-calculator` server, a result from an AWS documentation search, and a short summary of the workflow. If a server is missing, see the troubleshooting notes below.
+
+2. **Run a small first estimate.** Pick one of these:
+
+   ```text
+   Estimate one t4g.small EC2 instance running 24/7 in eu-west-1 with a 20 GB gp3 volume.
+   Estimate an S3 bucket with 100 GB in S3 Standard and 1 million GET requests per month in eu-north-1.
+   Estimate a small web app: an Application Load Balancer, two Fargate tasks with 0.5 vCPU and 1 GB each, and a db.t4g.micro PostgreSQL instance in eu-central-1.
+   ```
+
+   Expected: the agent asks for any missing figures, writes `cost-estimate/<name>.md`, shows a plan table and waits. Reply `go`. It then returns a `calculator.aws` link.
+
+3. **Check the result.** Open the link in a browser and confirm the services, Region and figures match the plan table. Open `cost-estimate/<name>.md` and confirm it lists the sources, assumptions and the link.
+
+4. **Try your own material:**
+
+   ```text
+   Analyze the Terraform in ./infra and produce an AWS Pricing Calculator estimate for eu-west-1.
+   ```
+
+**Troubleshooting**
+
+- **`pricing-calculator` missing or failing to start:** check `node --version`, then restart the agent or reload the plugin.
+- **`aws-knowledge` missing or rate-limited:** the estimate still works. The basis file notes that the documentation check was skipped.
+- **Skill not used:** ask for it by name. In Claude Code: `/aws-cost-calculator:aws-cost-calculator`. In Kiro: `/aws-cost-calculator`.
 
 ## Repository contents
 
