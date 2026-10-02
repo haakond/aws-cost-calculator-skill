@@ -155,6 +155,8 @@ The agent asks for any usage figures the material does not contain (request rate
 
 The skill depends on two MCP servers: [`aws-pricing-calculator-mcp-server`](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) (builds the estimate, required) and the [AWS Knowledge MCP server](https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server) (documentation fact check, strongly recommended). Neither needs AWS credentials. [Node.js](https://nodejs.org/en/download) is required for the calculator server. The Claude Code, Kiro and Cursor routes below install the skill and both servers together.
 
+After installing, ask the agent to "get started with the AWS cost calculator". A short onboarding skill, `aws-cost-calculator-getting-started`, checks that both servers are connected, explains the workflow and asks what to estimate.
+
 ### Claude Code
 
 ```text
@@ -186,8 +188,8 @@ Import the repository as a plugin: **Customize** → **Add Marketplace** → **I
 
 If the import is unavailable in the installed Cursor version, install the pieces manually:
 
-1. MCP servers, one click each: [calculator server](https://cursor.com/en/install-mcp?name=aws-pricing-calculator-mcp-server&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNhbXBsZS1hd3MtcHJpY2luZy1jYWxjdWxhdG9yLW1jcEBsYXRlc3QiXX0%3D) and [AWS Knowledge server](https://cursor.com/en/install-mcp?name=aws-knowledge-mcp-server&config=eyJ1cmwiOiJodHRwczovL2tub3dsZWRnZS1tY3AuZ2xvYmFsLmFwaS5hd3MifQ%3D%3D), or add the JSON from [`mcp.json`](mcp.json) to `~/.cursor/mcp.json`.
-2. Skill: copy `skills/aws-cost-calculator/` to `~/.cursor/skills/` (Cursor also reads `~/.claude/skills/` and `~/.agents/skills/`).
+1. MCP servers, one click each: [calculator server](https://cursor.com/en/install-mcp?name=pricing-calculator&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsInNhbXBsZS1hd3MtcHJpY2luZy1jYWxjdWxhdG9yLW1jcEBsYXRlc3QiXX0%3D) and [AWS Knowledge server](https://cursor.com/en/install-mcp?name=aws-knowledge&config=eyJ1cmwiOiJodHRwczovL2tub3dsZWRnZS1tY3AuZ2xvYmFsLmFwaS5hd3MifQ%3D%3D), or add the JSON from [`mcp.json`](mcp.json) to `~/.cursor/mcp.json`.
+2. Skills: copy both directories under `skills/` to `~/.cursor/skills/` (Cursor also reads `~/.claude/skills/` and `~/.agents/skills/`).
 
 ### Other agents
 
@@ -196,13 +198,13 @@ GitHub Copilot, Gemini CLI and any other client that supports Agent Skills and M
 1. Register both servers using the JSON in [`mcp.json`](mcp.json). In Claude Code without the plugin:
 
    ```sh
-   claude mcp add aws-pricing-calculator-mcp-server -- npx -y sample-aws-pricing-calculator-mcp@latest
-   claude mcp add --transport http aws-knowledge-mcp-server https://knowledge-mcp.global.api.aws
+   claude mcp add pricing-calculator -- npx -y sample-aws-pricing-calculator-mcp@latest
+   claude mcp add --transport http aws-knowledge https://knowledge-mcp.global.api.aws
    ```
 
    For VS Code / GitHub Copilot use the "Install in VS Code" badge in the [calculator server README](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp), and note that VS Code uses a `servers` key instead of `mcpServers`.
 
-2. Copy `skills/aws-cost-calculator/` into the agent's skills directory:
+2. Copy both directories under `skills/` into the agent's skills directory (`aws-cost-calculator` is the one that builds estimates; the getting-started skill is optional):
 
    | Agent | Personal | Project |
    |---|---|---|
@@ -216,7 +218,8 @@ Restart the client afterwards: MCP servers and skills are not picked up by a run
 
 | Path | Used by |
 |---|---|
-| `skills/aws-cost-calculator/SKILL.md` | The skill itself ([Agent Skills specification](https://agentskills.io/specification)); every route above |
+| `skills/aws-cost-calculator/SKILL.md` | The estimating skill ([Agent Skills specification](https://agentskills.io/specification)); every route above |
+| `skills/aws-cost-calculator-getting-started/SKILL.md` | Onboarding skill: server check, workflow overview, first prompts |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.mcp.json` | Claude Code plugin and marketplace |
 | `plugin.json`, `mcp.json` | Agent Plugins format: Kiro Power, Cursor plugin import |
 | `scripts/check_manifests.py`, `.github/workflows/validate.yml` | CI checks |
@@ -226,7 +229,7 @@ Tool names in the skill are written as bare MCP tool names (`create_estimate`, `
 
 ## Development
 
-GitHub Actions (`.github/workflows/validate.yml`) validates the skill with the Agent Skills reference validator (`skills-ref`, pinned to a commit), validates `plugin.json` and `mcp.json` against the Agent Plugins 1.0.0 schemas, and runs `scripts/check_manifests.py`, which checks that the plugin manifests, both MCP server files and `SKILL.md` agree on name, version, license and the required servers. Bump the version in `plugin.json`, `.claude-plugin/plugin.json` and the `SKILL.md` frontmatter together. Run `claude plugin validate .` locally before releasing; it is not part of CI.
+GitHub Actions (`.github/workflows/validate.yml`) validates the skill with the Agent Skills reference validator (`skills-ref`, pinned to a commit), validates `plugin.json` and `mcp.json` against the Agent Plugins 1.0.0 schemas, and runs `scripts/check_manifests.py`, which checks that the plugin manifests, both MCP server files and `SKILL.md` agree on name, version, license and the required servers. Bump the version in `plugin.json`, `.claude-plugin/plugin.json` and the frontmatter of both `SKILL.md` files together. Run `claude plugin validate .` locally before releasing; it is not part of CI.
 
 After cloning, install the git hooks with `pre-commit install --hook-type pre-commit --hook-type commit-msg`. Plain `pre-commit install` skips the `commit-msg` hook, which rejects co-author and assistant-attribution trailers.
 

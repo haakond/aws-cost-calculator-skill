@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = ROOT / "skills" / "aws-cost-calculator"
-REQUIRED_SERVERS = {"aws-pricing-calculator-mcp-server", "aws-knowledge-mcp-server"}
+REQUIRED_SERVERS = {"pricing-calculator", "aws-knowledge"}
 # Agent Plugins names the remote transport "streamable-http"; Claude Code's .mcp.json calls the same transport "http".
 AGENT_PLUGINS_TO_CLAUDE_TYPE = {"streamable-http": "http"}
 
@@ -45,6 +45,14 @@ def main() -> int:
         errors.append(f"plugin.json version '{plugin.get('version')}' does not match SKILL.md metadata.version '{skill_version}'")
     if plugin.get("license") != frontmatter_field(skill_md, "license"):
         errors.append("plugin.json license does not match SKILL.md license")
+
+    for other_skill_md in sorted((ROOT / "skills").glob("*/SKILL.md")):
+        text = other_skill_md.read_text(encoding="utf-8")
+        directory = other_skill_md.parent.name
+        if frontmatter_field(text, "name") != directory:
+            errors.append(f"skills/{directory}/SKILL.md name does not match its directory")
+        if frontmatter_field(text, "version") != skill_version:
+            errors.append(f"skills/{directory}/SKILL.md version '{frontmatter_field(text, 'version')}' does not match '{skill_version}'")
 
     missing = REQUIRED_SERVERS - set(mcp.get("mcpServers", {}))
     if missing:

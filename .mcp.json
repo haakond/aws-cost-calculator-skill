@@ -1,11 +1,11 @@
 {
   "mcpServers": {
-    "aws-pricing-calculator-mcp-server": {
+    "pricing-calculator": {
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "sample-aws-pricing-calculator-mcp@latest"]
     },
-    "aws-knowledge-mcp-server": {
+    "aws-knowledge": {
       "type": "http",
       "url": "https://knowledge-mcp.global.api.aws"
     }
