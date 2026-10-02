@@ -5,8 +5,8 @@ Build [AWS Pricing Calculator](https://calculator.aws) estimates from your Terra
 - **Output:** a shareable `calculator.aws` link, plus a markdown file with every input and assumption behind the estimate. The file is written before the estimate is built, so it can go into git alongside the code it describes.
 - **Input:** Infrastructure as Code (Terraform, CloudFormation, CDK), design documents or a list of services. The agent asks for usage figures it cannot find and marks any it has to estimate.
 - **Cost:** free. No AWS credentials needed.
-- **Requirements:** Node.js. The plugin installs everything else.
-- **Setup:** install as a Claude Code plugin, Kiro Power or Cursor plugin, or set it up by hand in any other agent. See [Setup](#setup).
+- **Requirements:** Node.js and internet access. The AWS Pricing Calculator MCP server runs locally on your machine and is downloaded by `npx` on first start.
+- **Setup:** install the calculator server (step 1), then set up your agent as a Claude Code plugin, Kiro Power, Cursor plugin or by hand (step 2). See [Setup](#setup).
 
 ## Challenges this solution addresses
 
@@ -123,25 +123,59 @@ Agent:  Estimate created and validated: https://calculator.aws/#/estimate?id=<id
 
 ## Setup
 
-### Before you start
+The setup has three steps, and the order matters:
 
-- Install [Node.js](https://nodejs.org/en/download) and check that `node --version` works in a terminal. No AWS account or credentials are needed.
-- The calculator MCP server is an AWS sample project that uses undocumented calculator APIs. It may change or break without notice.
+1. Install the AWS Pricing Calculator MCP server on your machine.
+2. Set up your agent: install the plugin, or register the servers and skills by hand.
+3. Verify the setup.
+
+The two MCP servers are different, and only one of them needs a local install:
+
+| MCP server | Where it runs | Local install |
+|---|---|---|
+| **AWS Pricing Calculator MCP server** (`pricing-calculator`) | On your machine, as a Node.js process that your agent starts. It is an [AWS sample project](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp), not a hosted service. | **Yes** (step 1) |
+| **AWS Knowledge MCP server** (`aws-knowledge`) | Remote, hosted by AWS at `https://knowledge-mcp.global.api.aws`. | **No.** Your agent only needs its URL (step 2). |
+
+### Step 1: Install the AWS Pricing Calculator MCP server (local)
+
+This server builds the estimate. Without it the skill cannot work. It runs locally and needs no AWS account or credentials. It talks to the public `calculator.aws` endpoints, so the machine needs internet access.
+
+**Requirements** (from the [server's Quick Start](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp#quick-start)):
+
+- [Node.js](https://nodejs.org/en/download). The server does not state a minimum version; use a current LTS release.
+- Access to the npm registry (to download the server) and to `calculator.aws` (to build estimates).
+
+**Install.** There is no separate install command. Your agent starts the server with `npx -y sample-aws-pricing-calculator-mcp@latest`, which downloads and caches the package on first start. The plugin installs in step 2 and the manual configuration both use this command.
+
+If you prefer to build it from source, the [server's README](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp#from-source) describes `git clone`, `npm install` and `npm run build`, and then configures `node /path/to/dist/mcp-server.js` as the command.
+
+**Check:**
+
+```sh
+node --version
+npm view sample-aws-pricing-calculator-mcp version
+```
+
+The first command prints a Node.js version. The second prints the current server version (1.3.2 when this was written), which shows that the npm registry is reachable. If either command fails, fix that before continuing.
+
+**Know before you continue:**
+
+- The server uses undocumented calculator APIs and can change or break without notice.
 - Estimates are planning figures, not AWS quotes. Review every estimated input in the assumptions table.
-- The AWS Knowledge MCP server is hosted by AWS, rate-limited, and receives the documentation queries the skill sends.
+- The AWS Knowledge server is rate-limited and receives the documentation queries the skill sends.
 
-### Choose your path
+### Step 2: Set up your agent
 
 | Your agent | What to do | Go to |
 |---|---|---|
 | Claude Code | Install the plugin (2 commands) | [Claude Code](#claude-code) |
 | Kiro | Import the Power from GitHub | [Kiro](#kiro) |
 | Cursor | Import the plugin from GitHub | [Cursor](#cursor) |
-| GitHub Copilot, Gemini CLI or any other agent | Set up the servers and skills by hand (4 steps) | [Any other agent](#any-other-agent-manual-setup) |
+| GitHub Copilot, Gemini CLI or any other agent | Register the servers and install the skills by hand | [Any other agent](#any-other-agent-manual-setup) |
 
-The plugin paths install both MCP servers and both skills in one go. After any path, [verify the setup](#verify-the-setup).
+The plugin paths register both MCP servers and install both skills in one go. They rely on step 1: the plugin only tells your agent how to start the calculator server. After any path, continue with [step 3](#step-3-verify-the-setup).
 
-### Claude Code
+#### Claude Code
 
 1. In a Claude Code session, add the marketplace:
 
@@ -161,41 +195,41 @@ The plugin paths install both MCP servers and both skills in one go. After any p
 
    **Check:** `claude plugin list` in a terminal shows `aws-cost-calculator` as enabled.
 
-4. Go to [Verify the setup](#verify-the-setup).
+4. Go to [Verify the setup](#step-3-verify-the-setup).
 
-### Kiro
+#### Kiro
 
 1. Open the **Powers** panel and choose **Add Custom Power** → **Import power from GitHub**.
 2. Enter `https://github.com/haakond/aws-cost-calculator-skill` and choose **Install**.
 
    **Check:** the MCP server list shows two entries ending in `pricing-calculator` and `aws-knowledge`, both **Connected**.
 
-3. Go to [Verify the setup](#verify-the-setup).
+3. Go to [Verify the setup](#step-3-verify-the-setup).
 
 To install from a local clone instead, choose **Import power from a folder** in step 1 and select the clone's root directory. Do not also copy the skills into `~/.kiro/skills/`; they would be registered twice.
 
-### Cursor
+#### Cursor
 
 1. Open **Customize** and choose **Add Marketplace** → **Import from Repo**.
 2. Enter `https://github.com/haakond/aws-cost-calculator-skill`.
 
    **Check:** both MCP servers (`pricing-calculator`, `aws-knowledge`) appear in Cursor's MCP settings, and the `aws-cost-calculator` skill appears when you type `/` in Agent chat.
 
-3. Go to [Verify the setup](#verify-the-setup).
+3. Go to [Verify the setup](#step-3-verify-the-setup).
 
 If your Cursor version cannot import plugins, follow [Any other agent](#any-other-agent-manual-setup) instead.
 
-### Any other agent (manual setup)
+#### Any other agent (manual setup)
 
-The manual setup installs three things:
+Step 1 must be done first. The manual setup then registers three things with your agent:
 
 | Component | Name | Role |
 |---|---|---|
-| [AWS Pricing Calculator MCP server](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) | `pricing-calculator` | Builds the estimate on `calculator.aws`. Required. |
-| [AWS Knowledge MCP server](https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server) | `aws-knowledge` | Checks the design against AWS documentation. Strongly recommended. |
+| [AWS Pricing Calculator MCP server](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) | `pricing-calculator` | Builds the estimate on `calculator.aws`. Required. Runs locally (step 1). |
+| [AWS Knowledge MCP server](https://awslabs.github.io/mcp/servers/aws-knowledge-mcp-server) | `aws-knowledge` | Checks the design against AWS documentation. Strongly recommended. Remote, nothing to install. |
 | Skills | `aws-cost-calculator`, `aws-cost-calculator-getting-started` | The estimating workflow, and a short onboarding guide |
 
-#### Step 1: Install the AWS Pricing Calculator MCP server
+**2a. Register the AWS Pricing Calculator MCP server**
 
 | Agent | How |
 |---|---|
@@ -215,9 +249,9 @@ The manual setup installs three things:
 }
 ```
 
-#### Step 2: Install the AWS Knowledge MCP server
+**2b. Register the AWS Knowledge MCP server**
 
-A remote server hosted by AWS; nothing runs locally.
+A remote server hosted by AWS; nothing is installed locally, the agent only needs the URL.
 
 | Agent | How |
 |---|---|
@@ -227,7 +261,7 @@ A remote server hosted by AWS; nothing runs locally.
 
 In VS Code, the MCP configuration uses a `servers` key instead of `mcpServers`.
 
-#### Step 3: Install the skills
+**2c. Install the skills**
 
 Clone this repository and copy both directories under `skills/` into your agent's skills directory. For Claude Code:
 
@@ -245,11 +279,11 @@ For other agents, replace `~/.claude/skills/` with:
 | Gemini CLI | `~/.gemini/skills/` | `.gemini/skills/` |
 | Cursor, GitHub Copilot, Gemini CLI (shared) | `~/.agents/skills/` | `.agents/skills/` |
 
-#### Step 4: Restart the agent
+**2d. Restart the agent**
 
-MCP servers and skills are only picked up when a session starts. Then go to [Verify the setup](#verify-the-setup).
+MCP servers and skills are only picked up when a session starts. Then continue with step 3.
 
-### Verify the setup
+### Step 3: Verify the setup
 
 1. **Check the servers.** Ask the agent:
 
@@ -275,7 +309,7 @@ MCP servers and skills are only picked up when a session starts. Then go to [Ver
 
 | Symptom | Fix |
 |---|---|
-| `pricing-calculator` is missing or fails to start | Check `node --version`, then restart the agent or reload the plugin |
+| `pricing-calculator` is missing or fails to start | Repeat the checks in step 1 (`node --version`, `npm view ...`), then restart the agent or reload the plugin. A blocked npm registry or a blocked `calculator.aws` also stops it. |
 | `aws-knowledge` is missing or rate-limited | The estimate still works; the basis file notes that the documentation check was skipped. Retry later. |
 | The agent answers without using the skill | Invoke it by name (see [Usage](#usage)) |
 
