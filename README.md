@@ -18,11 +18,13 @@ Most AWS estimates are still built by hand in the [calculator](https://calculato
 - **Incomplete by default.** The calculator does not prompt for common cost lines (root volumes, data transfer, backup storage, Multi-AZ, support plan) and does not model some billing details, such as management fees or minimum storage durations on archival tiers.
 - **Unreliable when delegated to an AI.** Without tooling, an agent recalls prices from training data or scrapes pricing pages that render client-side. The numbers look authoritative but are not current, and no estimate exists that anyone can open.
 
-## Why the output is a calculator estimate
+## Why a calculator.aws link
 
-- **It is easy to share.** A `calculator.aws` link can be sent to a customer or passed between teams in pre-sales, and the recipient can open and adjust it. A markdown table or a spreadsheet cannot be verified or edited the same way.
-- **It is a common format.** Customers, AWS account teams and AWS Partners all work with calculator links, so the estimate does not have to be explained or rebuilt in someone else's tool.
-- **AWS Partner processes require it.** For AWS Partners, Partner Central processes such as funding requests and opportunity deal sizing expect a Pricing Calculator estimate, and Partner Central can [import a calculator link](https://aws.amazon.com/about-aws/whats-new/2025/12/aws-partner-central-opportunity-deal-sizing) directly. A custom calculation rendered as markdown is not accepted there.
+The deliverable is a `calculator.aws` link rather than a table of numbers, because that is the format AWS cost conversations already run on:
+
+- **Anyone can open and check it.** A customer, a colleague or a reviewer can open the link, see every service and figure, and adjust it without access to your tools. A spreadsheet or a markdown table has to be explained and trusted; a calculator estimate can be checked.
+- **It works across organizations.** Customers, AWS account teams and AWS Partners all use calculator links, so an estimate can move between them in pre-sales and planning without being rebuilt.
+- **AWS Partner processes expect it.** Partner Central processes such as funding requests and opportunity deal sizing expect a Pricing Calculator estimate, and Partner Central can [import a calculator link](https://aws.amazon.com/about-aws/whats-new/2025/12/aws-partner-central-opportunity-deal-sizing) directly. A custom calculation rendered as markdown is not accepted there.
 
 ## Benefits
 
