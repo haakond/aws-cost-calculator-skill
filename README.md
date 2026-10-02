@@ -226,7 +226,7 @@ Tool names in the skill are written as bare MCP tool names (`create_estimate`, `
 
 ## Development
 
-GitHub Actions (`.github/workflows/validate.yml`) validates the skill with the Agent Skills reference validator (`skills-ref`, pinned to a commit) and runs `scripts/check_manifests.py`, which checks that the plugin manifests, both MCP server files and `SKILL.md` agree on name, version, license and the required servers. Bump the version in `plugin.json`, `.claude-plugin/plugin.json` and the `SKILL.md` frontmatter together. Run `claude plugin validate .` locally before releasing; it is not part of CI.
+GitHub Actions (`.github/workflows/validate.yml`) validates the skill with the Agent Skills reference validator (`skills-ref`, pinned to a commit), validates `plugin.json` and `mcp.json` against the Agent Plugins 1.0.0 schemas, and runs `scripts/check_manifests.py`, which checks that the plugin manifests, both MCP server files and `SKILL.md` agree on name, version, license and the required servers. Bump the version in `plugin.json`, `.claude-plugin/plugin.json` and the `SKILL.md` frontmatter together. Run `claude plugin validate .` locally before releasing; it is not part of CI.
 
 After cloning, install the git hooks with `pre-commit install --hook-type pre-commit --hook-type commit-msg`. Plain `pre-commit install` skips the `commit-msg` hook, which rejects co-author and assistant-attribution trailers.
 

@@ -14,6 +14,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SKILL_DIR = ROOT / "skills" / "aws-cost-calculator"
 REQUIRED_SERVERS = {"aws-pricing-calculator-mcp-server", "aws-knowledge-mcp-server"}
+# Agent Plugins names the remote transport "streamable-http"; Claude Code's .mcp.json calls the same transport "http".
+AGENT_PLUGINS_TO_CLAUDE_TYPE = {"streamable-http": "http"}
+
+
+def as_claude_servers(servers: dict) -> dict:
+    return {name: {**config, "type": AGENT_PLUGINS_TO_CLAUDE_TYPE.get(config.get("type"), config.get("type"))} for name, config in servers.items()}
 
 
 def frontmatter_field(text: str, key: str) -> str | None:
@@ -51,7 +57,7 @@ def main() -> int:
     for field in ("name", "version", "license"):
         if claude_plugin.get(field) != plugin.get(field):
             errors.append(f".claude-plugin/plugin.json {field} '{claude_plugin.get(field)}' does not match plugin.json '{plugin.get(field)}'")
-    if claude_mcp.get("mcpServers") != mcp.get("mcpServers"):
+    if claude_mcp.get("mcpServers") != as_claude_servers(mcp.get("mcpServers", {})):
         errors.append(".mcp.json (Claude Code) and mcp.json (Kiro, Cursor) define different mcpServers")
     entries = claude_marketplace.get("plugins", [])
     if [entry.get("name") for entry in entries] != [plugin.get("name")]:
