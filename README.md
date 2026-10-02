@@ -6,7 +6,7 @@ Build [AWS Pricing Calculator](https://calculator.aws) estimates from your Terra
 - **Input:** Infrastructure as Code (Terraform, CloudFormation, CDK), design documents or a list of services. The agent asks for usage figures it cannot find and marks any it has to estimate.
 - **Cost:** free. No AWS credentials needed.
 - **Requirements:** Node.js and internet access. The AWS Pricing Calculator MCP server runs locally on your machine and is downloaded by `npx` on first start.
-- **Setup:** install the calculator server (step 1), then set up your agent as a Claude Code plugin, Kiro Power, Cursor plugin or by hand (step 2). See [Setup](#setup).
+- **Setup:** prepare your machine for the local calculator server (step 1), then set up your agent as a Claude Code plugin, Kiro Power, Cursor plugin or by hand (step 2). See [Setup](#setup).
 
 ## Challenges this solution addresses
 
@@ -123,20 +123,16 @@ Agent:  Estimate created and validated: https://calculator.aws/#/estimate?id=<id
 
 ## Setup
 
-The setup has three steps, and the order matters:
-
-1. Install the AWS Pricing Calculator MCP server on your machine.
-2. Set up your agent: install the plugin, or register the servers and skills by hand.
+1. Prepare your machine to run the AWS Pricing Calculator MCP server locally.
+2. Set up your agent: install the plugin, or register the servers and skills by hand. This is also where the calculator server gets downloaded.
 3. Verify the setup.
 
-The two MCP servers are different, and only one of them needs a local install:
-
-| MCP server | Where it runs | Local install |
+| MCP server | Where it runs | Runs on your machine |
 |---|---|---|
-| **AWS Pricing Calculator MCP server** (`pricing-calculator`) | On your machine, as a Node.js process that your agent starts. It is an [AWS sample project](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp), not a hosted service. | **Yes** (step 1) |
+| **AWS Pricing Calculator MCP server** (`pricing-calculator`) | On your machine, as a Node.js process that your agent starts. It is an [AWS sample project](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp), not a hosted service. | **Yes**, so your machine must be prepared (step 1) |
 | **AWS Knowledge MCP server** (`aws-knowledge`) | Remote, hosted by AWS at `https://knowledge-mcp.global.api.aws`. | **No.** Your agent only needs its URL (step 2). |
 
-### Step 1: Install the AWS Pricing Calculator MCP server (local)
+### Step 1: Prepare your machine for the AWS Pricing Calculator MCP server (local)
 
 This server builds the estimate. Without it the skill cannot work. It runs locally and needs no AWS account or credentials. It talks to the public `calculator.aws` endpoints, so the machine needs internet access.
 
@@ -145,9 +141,7 @@ This server builds the estimate. Without it the skill cannot work. It runs local
 - [Node.js](https://nodejs.org/en/download). The server does not state a minimum version; use a current LTS release.
 - Access to the npm registry (to download the server) and to `calculator.aws` (to build estimates).
 
-**Install.** There is no separate install command. Your agent starts the server with `npx -y sample-aws-pricing-calculator-mcp@latest`, which downloads and caches the package on first start. The plugin installs in step 2 and the manual configuration both use this command.
-
-If you prefer to build it from source, the [server's README](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp#from-source) describes `git clone`, `npm install` and `npm run build`, and then configures `node /path/to/dist/mcp-server.js` as the command.
+**How the server gets installed.** You do not run an install command yourself. The first time your agent starts the server, it runs `npx -y sample-aws-pricing-calculator-mcp@latest`, which downloads the package from npm and caches it on your machine. Both the plugin in step 2 and the manual configuration use this command, so the download happens after step 2 and depends on the requirements above.
 
 **Check:**
 
@@ -206,7 +200,7 @@ The plugin paths register both MCP servers and install both skills in one go. Th
 
 3. Go to [Verify the setup](#step-3-verify-the-setup).
 
-To install from a local clone instead, choose **Import power from a folder** in step 1 and select the clone's root directory. Do not also copy the skills into `~/.kiro/skills/`; they would be registered twice.
+To install from a local clone instead, choose **Import power from a folder** in the first of the numbered steps above and select the clone's root directory. Do not also copy the skills into `~/.kiro/skills/`; they would be registered twice.
 
 #### Cursor
 
