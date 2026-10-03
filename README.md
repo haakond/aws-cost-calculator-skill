@@ -251,10 +251,10 @@ If your Cursor version cannot import plugins, use the [manual setup](#other-agen
 1. **Check the servers.** Ask the agent:
 
    ```text
-   Get started with the AWS cost calculator.
+   Get me started with the AWS Pricing Calculator plugin.
    ```
 
-   **Expected:** the version of the `pricing-calculator` server, a result from an AWS documentation search, and a short summary of the workflow.
+   This runs the `aws-pricing-calculator-getting-started` skill. **Expected:** the version of the `pricing-calculator` server, a result from an AWS documentation search, a short summary of the workflow, and a question about what you want to estimate. It does not create an estimate.
 
 2. **Run a small first estimate.** Pick one:
 
@@ -301,6 +301,8 @@ The skill starts automatically when a request is about an AWS cost estimate. To 
 | Claude Code | When the request matches the skill description | `/aws-pricing-calculator:aws-pricing-calculator` |
 | Kiro | When the request matches the Power keywords or the skill description | `/aws-pricing-calculator` |
 | Cursor | When the request matches the skill description | Type `/` in Agent chat and search for `aws-pricing-calculator` |
+
+The onboarding skill is invoked the same way, with `-getting-started` added to the skill name: `/aws-pricing-calculator:aws-pricing-calculator-getting-started` in Claude Code, `/aws-pricing-calculator-getting-started` in Kiro and Cursor.
 
 ### Typical use cases
 
