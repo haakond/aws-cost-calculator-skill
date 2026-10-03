@@ -65,35 +65,61 @@ Installing the plugin registers the skill and both MCP servers with the agent. A
 sequenceDiagram
     autonumber
     actor User
-    participant Agent as Agent (Claude Code, Kiro, Cursor etc.)
-    participant Skill as aws-cost-calculator skill
-    participant Calc as AWS Calculator MCP server
-    participant Know as AWS Knowledge MCP server
-    participant Basis as Basis file in the project
-    participant Web as calculator.aws
+    box rgba(128, 128, 128, 0.15) On your machine
+        participant Agent as Coding agent<br/>(Claude Code, Kiro, Cursor)
+        participant Repo as Project repository<br/>(Terraform, documents,<br/>basis file)
+        participant Calc as Calculator MCP server<br/>(local)
+    end
+    box rgba(128, 128, 128, 0.15) Hosted by AWS
+        participant Know as AWS Knowledge<br/>MCP server (remote)
+        participant Web as calculator.aws
+    end
 
+    Note over User,Web: Request
     User->>Agent: Estimate the cost of ./infra
-    Agent->>Skill: Request matches the skill description, load SKILL.md
-    Agent->>Agent: Read Terraform, plan output or design documents
-    Agent-->>User: Ask for usage figures that are missing
-    User->>Agent: Provide figures, or accept stated estimates
-    Agent->>Calc: search_services, get_service_fields (read-only)
-    Agent->>Know: Search AWS documentation for gaps in the cost model
-    Agent->>Basis: Write sources, plan, assumptions and findings (draft)
-    Agent-->>User: Plan table with sizing, assumptions and findings
-    User->>Agent: Confirm the plan
-    Agent->>Basis: Mark the basis as confirmed
-    Agent->>Calc: create_estimate and add_service
-    Calc->>Web: Write draft estimate
-    Agent->>Calc: validate_estimate
-    Agent->>Calc: export_estimate
-    Calc-->>Agent: Shareable calculator.aws link
-    Agent->>Know: Second check of the final estimate
-    Agent->>Basis: Add link, findings and history row (built)
-    Agent-->>User: Link and basis file location
+    Note over Agent: Skill instructions loaded<br/>(aws-cost-calculator)
+
+    Note over User,Web: Understand
+    Agent->>Repo: Read Terraform, plan output and design documents
+    loop Usage figures missing
+        Agent->>User: Ask for the missing usage figures
+        User-->>Agent: Provide figures, or accept labelled estimates
+    end
+    Agent->>Calc: Look up services and field definitions (read-only)
+    Agent->>Know: Check the design against AWS documentation
+
+    Note over User,Web: Agree
+    Agent->>Repo: Write the basis file (draft)
+    Agent->>User: Present the plan table
+    alt Plan approved
+        User-->>Agent: Confirm the plan
+        Note over User,Web: Deliver
+        Agent->>Calc: Create and validate the estimate
+        loop Validation fails
+            Agent->>Calc: Fix the reported field and validate again
+        end
+        Calc->>Web: Save the estimate
+        Calc-->>Agent: Shareable calculator.aws link
+        Agent->>Repo: Finalize the basis file (link, second documentation check, history)
+        Agent-->>User: Link and basis file location
+    else User changes a number
+        User->>Agent: Change a figure or assumption
+        Note over User,Web: Repeat from Understand with the updated figure
+    end
+
+    Note over User,Web: Solid arrow: request. Dashed arrow: response. Grey frames: trust boundary.
 ```
 
-The basis file exists before the build, and nothing is written to `calculator.aws` until the user confirms the plan (message 10). The user can commit the basis file before and after the build.
+The basis file exists before the build, and nothing is written to `calculator.aws` until the user confirms the plan (message 9). The user can commit the basis file before and after the build.
+
+The MCP tools behind the messages:
+
+| Message | MCP tools |
+|---|---|
+| Look up services and field definitions | `search_services`, `get_service_fields` |
+| Check the design against AWS documentation | AWS Knowledge server: documentation search and read |
+| Create and validate the estimate | `create_estimate`, `add_service`, `validate_estimate` (or `build_estimate`) |
+| Save the estimate, return the link | `export_estimate` |
 
 ### Example
 
