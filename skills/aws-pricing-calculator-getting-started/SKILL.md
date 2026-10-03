@@ -1,13 +1,13 @@
 ---
-name: aws-cost-calculator-getting-started
-description: Onboarding for the aws-cost-calculator plugin or Kiro Power. Use when the user has just installed it, asks what it does or how to get started, or wants to check that its two MCP servers are connected. For building an actual estimate, use the aws-cost-calculator skill.
+name: aws-pricing-calculator-getting-started
+description: Onboarding for the aws-pricing-calculator plugin or Kiro Power. Use when the user has just installed it, asks what it does or how to get started, or wants to check that its two MCP servers are connected. For building an actual estimate, use the aws-pricing-calculator skill.
 license: MIT
 metadata:
   author: Håkon Eriksen Drange
   version: "0.1.0"
 ---
 
-# Getting started with AWS Cost Calculator
+# Getting started with AWS Pricing Calculator
 
 ## Overview
 
@@ -15,8 +15,8 @@ This plugin turns Terraform, other Infrastructure as Code, design documents or a
 
 | Component | Role |
 |---|---|
-| `aws-cost-calculator` skill | The estimating workflow: inventory, documentation check, basis file, confirmation, build, link |
-| `aws-cost-calculator-getting-started` skill | This onboarding guide |
+| `aws-pricing-calculator` skill | The estimating workflow: inventory, documentation check, basis file, confirmation, build, link |
+| `aws-pricing-calculator-getting-started` skill | This onboarding guide |
 | `pricing-calculator` MCP server | Builds the estimate on `calculator.aws` and returns the share link (required, needs Node.js) |
 | `aws-knowledge` MCP server | Checks the design against current AWS documentation (strongly recommended) |
 
@@ -53,7 +53,7 @@ Ask the user for:
 - The AWS Region
 - Any usage figures already known (requests per second, data volume, storage, run hours)
 
-Then hand over to the `aws-cost-calculator` skill.
+Then hand over to the `aws-pricing-calculator` skill.
 
 ## Example prompts
 

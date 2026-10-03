@@ -1,5 +1,5 @@
 ---
-name: aws-cost-calculator
+name: aws-pricing-calculator
 description: Use when building a cost estimate for an AWS architecture — a proposed design, a Terraform module, or an existing deployment — and the output needs to be a real, shareable AWS Pricing Calculator (calculator.aws) estimate rather than a back-of-envelope number from memory.
 license: MIT
 compatibility: Requires the sample-aws-pricing-calculator-mcp MCP server (aws-pricing-calculator-mcp-server) and Node.js. Strongly recommended - AWS Knowledge MCP server (used for the documentation fact checks). Works with any agent runtime that supports Agent Skills and MCP.
@@ -8,7 +8,7 @@ metadata:
   version: "0.1.0"
 ---
 
-# AWS Cost Calculator
+# AWS Pricing Calculator
 
 ## Overview
 

@@ -1,13 +1,13 @@
 {
-  "name": "aws-cost-calculator",
-  "description": "AWS Cost Calculator skill with the MCP servers it depends on.",
+  "name": "aws-pricing-calculator",
+  "description": "AWS Pricing Calculator skill with the MCP servers it depends on.",
   "owner": {
     "name": "Håkon Eriksen Drange",
     "url": "https://github.com/haakond"
   },
   "plugins": [
     {
-      "name": "aws-cost-calculator",
+      "name": "aws-pricing-calculator",
       "source": ".",
       "description": "Build a real, shareable AWS Pricing Calculator (calculator.aws) estimate for an AWS architecture. Bundles the calculator and AWS Knowledge MCP servers."
     }

@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL_DIR = ROOT / "skills" / "aws-cost-calculator"
+SKILL_DIR = ROOT / "skills" / "aws-pricing-calculator"
 REQUIRED_SERVERS = {"pricing-calculator", "aws-knowledge"}
 # Agent Plugins names the remote transport "streamable-http"; Claude Code's .mcp.json calls the same transport "http".
 AGENT_PLUGINS_TO_CLAUDE_TYPE = {"streamable-http": "http"}

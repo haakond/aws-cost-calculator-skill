@@ -1,4 +1,4 @@
-# Agent skill: aws-cost-calculator
+# Agent skill: aws-pricing-calculator
 
 Build [AWS Pricing Calculator](https://calculator.aws) estimates from your Terraform, design documents or a list of services, using the coding agent you already work in. Works with Claude Code, Kiro, Cursor and any other agent that supports Agent Skills and MCP.
 
@@ -77,7 +77,7 @@ sequenceDiagram
 
     Note over User,Web: Request
     User->>Agent: Estimate the cost of ./infra
-    Note over Agent: Skill instructions loaded<br/>(aws-cost-calculator)
+    Note over Agent: Skill instructions loaded<br/>(aws-pricing-calculator)
 
     Note over User,Web: Understand
     Agent->>Repo: Read Terraform, plan output and design documents
@@ -157,7 +157,7 @@ The setup gives your agent two MCP servers and the skills:
 |---|---|---|
 | **AWS Pricing Calculator MCP server** (`pricing-calculator`), an [AWS sample project](https://github.com/aws-samples/sample-aws-pricing-calculator-mcp) that builds the estimate | On your machine, as a Node.js process that your agent starts | Downloaded automatically by `npx` the first time your agent starts it. No install command to run. |
 | **AWS Knowledge MCP server** (`aws-knowledge`), which checks the design against AWS documentation | Remote, hosted by AWS | Nothing to install. Your agent only needs its URL. |
-| **Skills** (`aws-cost-calculator`, `aws-cost-calculator-getting-started`) | In your agent | The plugin, or you by hand |
+| **Skills** (`aws-pricing-calculator`, `aws-pricing-calculator-getting-started`) | In your agent | The plugin, or you by hand |
 
 Choose your agent:
 
@@ -173,20 +173,20 @@ Then [verify the setup](#verify-the-setup).
 1. In a Claude Code session, add the marketplace and install the plugin:
 
    ```text
-   /plugin marketplace add haakond/aws-cost-calculator-skill
-   /plugin install aws-cost-calculator@aws-cost-calculator
+   /plugin marketplace add haakond/aws-pricing-calculator-skill
+   /plugin install aws-pricing-calculator@aws-pricing-calculator
    ```
 
-   On Claude Code 2.1.275 or later, `/plugin install aws-cost-calculator --marketplace haakond/aws-cost-calculator-skill` does both in one command.
+   On Claude Code 2.1.275 or later, `/plugin install aws-pricing-calculator --marketplace haakond/aws-pricing-calculator-skill` does both in one command.
 
 2. Choose a scope when prompted, then run `/reload-plugins` if asked.
 
-**Check:** `claude plugin list` in a terminal shows `aws-cost-calculator` as enabled.
+**Check:** `claude plugin list` in a terminal shows `aws-pricing-calculator` as enabled.
 
 ### Kiro
 
 1. Open the **Powers** panel and choose **Add Custom Power** → **Import power from GitHub**.
-2. Enter `https://github.com/haakond/aws-cost-calculator-skill` and choose **Install**.
+2. Enter `https://github.com/haakond/aws-pricing-calculator-skill` and choose **Install**.
 
 **Check:** the MCP server list shows two entries ending in `pricing-calculator` and `aws-knowledge`, both **Connected**.
 
@@ -195,9 +195,9 @@ To install from a local clone instead, choose **Import power from a folder** and
 ### Cursor
 
 1. Open **Customize** and choose **Add Marketplace** → **Import from Repo**.
-2. Enter `https://github.com/haakond/aws-cost-calculator-skill`.
+2. Enter `https://github.com/haakond/aws-pricing-calculator-skill`.
 
-**Check:** both MCP servers (`pricing-calculator`, `aws-knowledge`) appear in Cursor's MCP settings, and the `aws-cost-calculator` skill appears when you type `/` in Agent chat.
+**Check:** both MCP servers (`pricing-calculator`, `aws-knowledge`) appear in Cursor's MCP settings, and the `aws-pricing-calculator` skill appears when you type `/` in Agent chat.
 
 If your Cursor version cannot import plugins, use the [manual setup](#other-agents-manual-setup).
 
@@ -231,8 +231,8 @@ If your Cursor version cannot import plugins, use the [manual setup](#other-agen
 2. **Copy the skills.** Clone this repository and copy both directories under `skills/` into your agent's skills directory. For Claude Code:
 
    ```sh
-   git clone https://github.com/haakond/aws-cost-calculator-skill
-   cp -R aws-cost-calculator-skill/skills/* ~/.claude/skills/
+   git clone https://github.com/haakond/aws-pricing-calculator-skill
+   cp -R aws-pricing-calculator-skill/skills/* ~/.claude/skills/
    ```
 
    For other agents, replace `~/.claude/skills/` with:
@@ -298,9 +298,9 @@ The skill starts automatically when a request is about an AWS cost estimate. To 
 
 | Agent | Automatic | By name |
 |---|---|---|
-| Claude Code | When the request matches the skill description | `/aws-cost-calculator:aws-cost-calculator` |
-| Kiro | When the request matches the Power keywords or the skill description | `/aws-cost-calculator` |
-| Cursor | When the request matches the skill description | Type `/` in Agent chat and search for `aws-cost-calculator` |
+| Claude Code | When the request matches the skill description | `/aws-pricing-calculator:aws-pricing-calculator` |
+| Kiro | When the request matches the Power keywords or the skill description | `/aws-pricing-calculator` |
+| Cursor | When the request matches the skill description | Type `/` in Agent chat and search for `aws-pricing-calculator` |
 
 ### Typical use cases
 
@@ -314,8 +314,8 @@ The skill starts automatically when a request is about an AWS cost estimate. To 
 
 | Path | Used by |
 |---|---|
-| `skills/aws-cost-calculator/SKILL.md` | The estimating skill ([Agent Skills specification](https://agentskills.io/specification)); every setup path |
-| `skills/aws-cost-calculator-getting-started/SKILL.md` | Onboarding skill: server check, workflow overview, first prompts |
+| `skills/aws-pricing-calculator/SKILL.md` | The estimating skill ([Agent Skills specification](https://agentskills.io/specification)); every setup path |
+| `skills/aws-pricing-calculator-getting-started/SKILL.md` | Onboarding skill: server check, workflow overview, first prompts |
 | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `.mcp.json` | Claude Code plugin and marketplace |
 | `plugin.json`, `mcp.json` | Agent Plugins format: Kiro Power, Cursor plugin import |
 | `scripts/check_manifests.py`, `.github/workflows/validate.yml` | CI checks |
